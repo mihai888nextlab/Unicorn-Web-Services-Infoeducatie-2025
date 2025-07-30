@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import jwt from "@fastify/jwt";
+import multipart from "@fastify/multipart";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { config } from "dotenv";
@@ -26,7 +27,7 @@ async function registerPlugins() {
   });
 
   // Multipart support for file uploads
-  await fastify.register(import("@fastify/multipart"), {
+  await fastify.register(multipart, {
     limits: {
       fileSize: 10 * 1024 * 1024, // 10MB limit
     },
@@ -76,17 +77,13 @@ async function registerRoutes() {
     // Import routes
     const { default: authRoutes } = await import("./routes/auth.js");
     const { default: appRoutes } = await import("./routes/apps.js");
-    const deploymentRoutes = require("./routes/deployments");
-    const storageRoutes = require("./routes/storage");
+    const { default: storageRoutes } = await import("./routes/storage.js");
 
     // Authentication routes
     fastify.register(authRoutes, { prefix: "/api/auth" });
 
     // App management routes
     fastify.register(appRoutes, { prefix: "/api/apps" });
-
-    // Deployment routes
-    fastify.register(deploymentRoutes, { prefix: "/api" });
 
     // Storage routes (S3-compatible)
     fastify.register(storageRoutes, { prefix: "/api/storage" });
