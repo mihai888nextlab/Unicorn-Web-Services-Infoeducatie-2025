@@ -117,6 +117,7 @@ export function AppSidebar({ currentPage }: AppSidebarProps) {
         { name: "API Gateway", href: "/app/services/api-gateway", icon: GlobeAltIcon },
         { name: "Database", href: "/app/services/database", icon: CircleStackIcon },
         { name: "Compute", href: "/app/services/compute", icon: CpuChipIcon },
+        { name: "Secrets Manager", href: "/app/services/secrets", icon: KeyIcon },
         { name: "Networking", href: "/app/services/networking", icon: Squares2X2Icon },
       ]
       return (
