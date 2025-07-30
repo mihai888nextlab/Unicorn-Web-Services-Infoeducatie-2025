@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { HeroHeader } from "@/components/hero/hero-header"
+import { HeroFooter } from "@/components/hero/hero-footer"
 import {
-  CloudIcon,
   ServerIcon,
   BoltIcon,
   CircleStackIcon,
@@ -158,35 +159,7 @@ export default function HeroPage() {
       </div>
 
       {/* Header */}
-      <header
-        className={`border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-700 ${isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}
-      >
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 group">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
-                <CloudIcon className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold">Unicorn Web Services</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="hover:scale-105 transition-transform duration-200" asChild>
-                <a href="/dashboard">Dashboard</a>
-              </Button>
-              <Button variant="ghost" className="hover:scale-105 transition-transform duration-200">
-                Pricing
-              </Button>
-              <Button variant="ghost" className="hover:scale-105 transition-transform duration-200">
-                Docs
-              </Button>
-              <ThemeToggle />
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white hover:scale-105 transition-all duration-200 hover:shadow-lg">
-                Get Started
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <HeroHeader isVisible={isVisible} />
 
       {/* Hero Section */}
       <section className="container mx-auto px-6 py-20 relative">
@@ -468,39 +441,7 @@ export default function HeroPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-muted/30">
-        <div className="container mx-auto px-6 py-12">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0 group">
-              <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-blue-600 rounded flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
-                <CloudIcon className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-semibold group-hover:text-purple-600 transition-colors duration-300">
-                Unicorn Web Services
-              </span>
-            </div>
-
-            <div className="flex space-x-6 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-purple-600 transition-all duration-300 hover:scale-105">
-                Privacy
-              </a>
-              <a href="#" className="hover:text-purple-600 transition-all duration-300 hover:scale-105">
-                Terms
-              </a>
-              <a href="#" className="hover:text-purple-600 transition-all duration-300 hover:scale-105">
-                Support
-              </a>
-              <a href="#" className="hover:text-purple-600 transition-all duration-300 hover:scale-105">
-                Status
-              </a>
-            </div>
-          </div>
-
-          <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-            © 2024 Unicorn Web Services. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <HeroFooter />
 
       <style jsx>{`
         @keyframes slideInUp {

@@ -1,6 +1,3 @@
-
-"use client"
-
 import { Button } from "@/components/ui/button"
 import { CloudIcon } from "@heroicons/react/24/outline"
 import { ThemeToggle } from "../theme-toggle"
@@ -16,12 +13,12 @@ export function HeroHeader({ isVisible }: HeroHeaderProps) {
     >
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 group">
+          <a href="/" className="flex items-center space-x-2 group hover:no-underline">
             <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
               <CloudIcon className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold">Unicorn Web Services</span>
-          </div>
+          </a>
           <div className="flex items-center space-x-4">
             <Button variant="ghost" className="hover:scale-105 transition-transform duration-200" asChild>
               <a href="/dashboard">Dashboard</a>
@@ -33,8 +30,8 @@ export function HeroHeader({ isVisible }: HeroHeaderProps) {
               Docs
             </Button>
             <ThemeToggle />
-            <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white hover:scale-105 transition-all duration-200 hover:shadow-lg">
-              Get Started
+            <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white hover:scale-105 transition-all duration-200 hover:shadow-lg" asChild>
+              <a href="/register">Get Started</a>
             </Button>
           </div>
         </div>

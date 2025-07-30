@@ -7,14 +7,14 @@ export function HeroFooter() {
     <footer className="border-t bg-muted/30">
       <div className="container mx-auto px-6 py-12">
         <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center space-x-2 mb-4 md:mb-0 group">
+          <a href="/" className="flex items-center space-x-2 mb-4 md:mb-0 group hover:no-underline">
             <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-blue-600 rounded flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
               <CloudIcon className="w-4 h-4 text-white" />
             </div>
             <span className="font-semibold group-hover:text-purple-600 transition-colors duration-300">
               Unicorn Web Services
             </span>
-          </div>
+          </a>
 
           <div className="flex space-x-6 text-sm text-muted-foreground">
             <a href="#" className="hover:text-purple-600 transition-all duration-300 hover:scale-105">

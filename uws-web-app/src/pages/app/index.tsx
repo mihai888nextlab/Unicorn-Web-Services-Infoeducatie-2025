@@ -196,7 +196,10 @@ export default function Component() {
             onDragEnd={handleDragEnd}
           >
             {/* Sortable Grid with Real-time Reordering */}
-            <SortableGrid items={cardIds} className={layoutStyles[currentLayout].className}>
+            <SortableGrid
+              items={cardIds}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+            >
               {sortedCards.map((card: any) => renderCard(card))}
             </SortableGrid>
 

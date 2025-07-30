@@ -9,6 +9,14 @@ import {
   CreditCardIcon,
   UsersIcon,
   Cog6ToothIcon,
+  CpuChipIcon,
+  CircleStackIcon,
+  CloudIcon,
+  Squares2X2Icon,
+  ArrowPathIcon,
+  AdjustmentsHorizontalIcon,
+  KeyIcon,
+  GlobeAltIcon,
 } from "@heroicons/react/24/outline"
 import { useEffect, useState } from "react"
 
@@ -77,6 +85,38 @@ export function AppSidebar({ currentPage }: AppSidebarProps) {
         </a>
       </Button>
     )
+
+    // Add sub-navigation for Services
+    if (!isCollapsed && item.id === "services" && isActive) {
+      // Add icons for each service
+      const allServices = [
+        { name: "API Gateway", href: "/app/services/api-gateway", icon: GlobeAltIcon },
+        { name: "Database", href: "/app/services/database", icon: CircleStackIcon },
+        { name: "Storage", href: "/app/services/storage", icon: CloudIcon },
+        { name: "Compute", href: "/app/services/compute", icon: CpuChipIcon },
+        { name: "Networking", href: "/app/services/networking", icon: Squares2X2Icon },
+      ]
+      return (
+        <div>
+          {button}
+          <div className="ml-8 mt-1 flex flex-col border-l border-border/40 pl-3 gap-1 max-h-80 overflow-y-auto pr-2">
+            {allServices.map((service) => {
+              const ServiceIcon = service.icon
+              return (
+                <a
+                  key={service.href}
+                  href={service.href}
+                  className="flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground transition-colors py-1 px-2 rounded-md hover:bg-accent/30"
+                >
+                  <ServiceIcon className="w-4 h-4 flex-shrink-0 opacity-80" />
+                  {service.name}
+                </a>
+              )
+            })}
+          </div>
+        </div>
+      )
+    }
 
     if (isCollapsed) {
       return (
