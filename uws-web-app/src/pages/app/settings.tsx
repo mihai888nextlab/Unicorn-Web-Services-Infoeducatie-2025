@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import type { ReactElement } from "react"
 import { ResizableLayout } from "../../components/layout/resizable-layout"
 import { AuthGuard } from "@/components/auth/auth-guard"
 import { SettingsSidebar } from "../../components/settings/settings-sidebar"
@@ -8,8 +9,9 @@ import { ProfileSection } from "../../components/settings/profile-section"
 import { NotificationsSection } from "../../components/settings/notifications-section"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import { AIChatbot } from "../../components/ai-chatbot"
+import type { NextPageWithLayout } from "../_app"
 
-export default function SettingsPage() {
+const SettingsPage: NextPageWithLayout = () => {
   const [activeSection, setActiveSection] = useState("profile")
   const [settingsSidebarWidth, setSettingsSidebarWidth] = useState(25)
   const [notifications, setNotifications] = useState({
@@ -52,28 +54,32 @@ export default function SettingsPage() {
   return (
     <AuthGuard>
     <>
-      <ResizableLayout currentPage="settings">
-        <ResizablePanelGroup direction="horizontal" className="h-full">
-          {/* Settings Sidebar Panel - Uses persisted width */}
-          <ResizablePanel
-            defaultSize={settingsSidebarWidth}
-            minSize={6}
-            maxSize={35}
-            onResize={handleSettingsSidebarResize}
-          >
-            <SettingsSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-          </ResizablePanel>
+      <ResizablePanelGroup direction="horizontal" className="h-full">
+        {/* Settings Sidebar Panel - Uses persisted width */}
+        <ResizablePanel
+          defaultSize={settingsSidebarWidth}
+          minSize={6}
+          maxSize={35}
+          onResize={handleSettingsSidebarResize}
+        >
+          <SettingsSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+        </ResizablePanel>
 
-          <ResizableHandle withHandle />
+        <ResizableHandle withHandle />
 
-          {/* Settings Content Panel */}
-          <ResizablePanel defaultSize={100 - settingsSidebarWidth} minSize={65}>
-            <main className="p-8 h-full overflow-auto">{renderContent()}</main>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </ResizableLayout>
+        {/* Settings Content Panel */}
+        <ResizablePanel defaultSize={100 - settingsSidebarWidth} minSize={65}>
+          <main className="p-8 h-full overflow-auto">{renderContent()}</main>
+        </ResizablePanel>
+      </ResizablePanelGroup>
       <AIChatbot />
     </>
     </AuthGuard>
   )
-}
+};
+
+SettingsPage.getLayout = function getLayout(page: ReactElement) {
+  return <ResizableLayout currentPage="settings">{page}</ResizableLayout>;
+};
+
+export default SettingsPage;

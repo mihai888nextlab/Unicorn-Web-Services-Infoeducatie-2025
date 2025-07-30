@@ -1,5 +1,6 @@
 "use client"
 
+import type { ReactElement } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -17,8 +18,9 @@ import { CurrentBillSummary } from "../../components/billing/current-bill-summar
 import { UsageCard } from "../../components/billing/usage-card"
 import { InvoiceCard } from "../../components/billing/invoice-card"
 import { AIChatbot } from "../../components/ai-chatbot"
+import type { NextPageWithLayout } from "../_app"
 
-export default function BillingPage() {
+const BillingPage: NextPageWithLayout = () => {
   const currentUsage = [
     {
       service: "Storage",
@@ -87,85 +89,89 @@ export default function BillingPage() {
   return (
     <AuthGuard>
     <>
-      <ResizableLayout currentPage="billing">
-        <div className="p-6 h-full overflow-auto">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold mb-2">Your Billing</h2>
-            <p className="text-muted-foreground text-lg">Keep track of your usage and costs</p>
-          </div>
-
-          <CurrentBillSummary totalCost={totalCurrentCost} />
-
-          <Tabs defaultValue="usage" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="usage">Current Usage</TabsTrigger>
-              <TabsTrigger value="history">Billing History</TabsTrigger>
-              <TabsTrigger value="payment">Payment Methods</TabsTrigger>
-              <TabsTrigger value="tips">Save Money</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="usage" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {currentUsage.map((service, index) => (
-                  <UsageCard
-                    key={index}
-                    service={service.service}
-                    icon={service.icon}
-                    usage={service.usage}
-                    limit={service.limit}
-                    cost={service.cost}
-                    percentage={service.percentage}
-                    description={service.description}
-                  />
-                ))}
-              </div>
-
-              <Card className="bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-3">
-                    <InformationCircleIcon className="w-6 h-6 text-blue-600 mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-blue-900 dark:text-blue-100">Good news!</h4>
-                      <p className="text-blue-800 dark:text-blue-200 mt-1">
-                        You're using your resources efficiently. Your current usage is well within limits and costs are
-                        predictable.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="history" className="space-y-6">
-              <div className="space-y-4">
-                {recentInvoices.map((invoice, index) => (
-                  <InvoiceCard
-                    key={index}
-                    id={invoice.id}
-                    date={invoice.date}
-                    amount={invoice.amount}
-                    status={invoice.status}
-                    dueDate={invoice.dueDate}
-                  />
-                ))}
-              </div>
-
-              <Card className="border-dashed">
-                <CardContent className="p-8 text-center">
-                  <DocumentTextIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="font-medium mb-2">Need older invoices?</h3>
-                  <p className="text-muted-foreground mb-4">
-                    We keep all your billing history. Contact support to get invoices older than 3 months.
-                  </p>
-                  <Button variant="outline">Contact Support</Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+      <div className="p-6 h-full overflow-auto">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold mb-2">Your Billing</h2>
+          <p className="text-muted-foreground text-lg">Keep track of your usage and costs</p>
         </div>
-      </ResizableLayout>
+
+        <CurrentBillSummary totalCost={totalCurrentCost} />
+
+        <Tabs defaultValue="usage" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="usage">Current Usage</TabsTrigger>
+            <TabsTrigger value="history">Billing History</TabsTrigger>
+            <TabsTrigger value="payment">Payment Methods</TabsTrigger>
+            <TabsTrigger value="tips">Save Money</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="usage" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {currentUsage.map((service, index) => (
+                <UsageCard
+                  key={index}
+                  service={service.service}
+                  icon={service.icon}
+                  usage={service.usage}
+                  limit={service.limit}
+                  cost={service.cost}
+                  percentage={service.percentage}
+                  description={service.description}
+                />
+              ))}
+            </div>
+
+            <Card className="bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800">
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-3">
+                  <InformationCircleIcon className="w-6 h-6 text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-blue-900 dark:text-blue-100">Good news!</h4>
+                    <p className="text-blue-800 dark:text-blue-200 mt-1">
+                      You're using your resources efficiently. Your current usage is well within limits and costs are
+                      predictable.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-6">
+            <div className="space-y-4">
+              {recentInvoices.map((invoice, index) => (
+                <InvoiceCard
+                  key={index}
+                  id={invoice.id}
+                  date={invoice.date}
+                  amount={invoice.amount}
+                  status={invoice.status}
+                  dueDate={invoice.dueDate}
+                />
+              ))}
+            </div>
+
+            <Card className="border-dashed">
+              <CardContent className="p-8 text-center">
+                <DocumentTextIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-medium mb-2">Need older invoices?</h3>
+                <p className="text-muted-foreground mb-4">
+                  We keep all your billing history. Contact support to get invoices older than 3 months.
+                </p>
+                <Button variant="outline">Contact Support</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
       <AIChatbot />
     </>
     </AuthGuard>
   )
-}
+};
+
+BillingPage.getLayout = function getLayout(page: ReactElement) {
+  return <ResizableLayout currentPage="billing">{page}</ResizableLayout>;
+};
+
+export default BillingPage;

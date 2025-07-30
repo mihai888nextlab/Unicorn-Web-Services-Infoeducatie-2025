@@ -153,6 +153,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const getUserData = async () => {
     const token = localStorage.getItem("auth_token");
+    console.log("token", token);
     if (!token) {
       setUser(null);
       return false;
@@ -168,12 +169,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
           },
         }
       );
+
       if (!response.ok) {
         throw new Error("Failed to fetch user data");
       }
 
       const data = await response.json();
-      setUser(data.user);
+      setUser(data);
 
       if (data.user) {
         return true;
