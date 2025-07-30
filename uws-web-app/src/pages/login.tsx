@@ -1,5 +1,5 @@
 
-import { LoginForm } from "@/components/auth/login-form"
+import { LoginForm } from "@/components/ui/login-form"
 import { HeroHeader } from "@/components/hero/hero-header"
 import { useState } from "react"
 
@@ -9,13 +9,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <HeroHeader isVisible={isVisible} />
       <main className="flex-1 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md p-8 rounded-2xl shadow-2xl bg-card border border-muted/40 backdrop-blur-lg">
-          <h1 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Sign in to your account</h1>
           <LoginForm />
-          <div className="mt-6 text-center text-muted-foreground text-sm">
-            Don&apos;t have an account? <a href="/register" className="text-primary underline">Register</a>
-          </div>
-        </div>
       </main>
       <footer className="border-t bg-muted/30 mt-12">
         <div className="container mx-auto px-6 py-8">

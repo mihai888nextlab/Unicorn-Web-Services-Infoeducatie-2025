@@ -17,8 +17,10 @@ import {
   AdjustmentsHorizontalIcon,
   KeyIcon,
   GlobeAltIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/router"
 
 interface AppSidebarProps {
   currentPage?: string
@@ -65,6 +67,19 @@ export function AppSidebar({ currentPage }: AppSidebarProps) {
   ]
 
   const SidebarButton = ({ item }: { item: (typeof navItems)[0] }) => {
+    // Use Next.js router for current path
+    let currentPath = ""
+    try {
+      // next/router is only available in client components
+      // fallback to window.location if router is not available
+      // (for non-Next.js environments)
+      // This will work in Next.js pages and app directory
+      // @ts-ignore
+      const usePathname = require('next/navigation').usePathname
+      currentPath = usePathname ? usePathname() : (typeof window !== "undefined" ? window.location.pathname : "")
+    } catch {
+      currentPath = typeof window !== "undefined" ? window.location.pathname : ""
+    }
     const IconComponent = item.icon
     const isActive = currentPage === item.id
 
@@ -79,9 +94,17 @@ export function AppSidebar({ currentPage }: AppSidebarProps) {
         size={isCollapsed ? "icon" : "sm"}
         asChild
       >
-        <a href={item.href}>
+        <a href={item.href} className="flex items-center w-full">
           <IconComponent className={`${isCollapsed ? "w-5 h-5" : "w-4 h-4 mr-3"} flex-shrink-0`} />
-          {!isCollapsed && <span className="truncate">{item.label}</span>}
+          {!isCollapsed && (
+            <>
+              <span className="truncate">{item.label}</span>
+              {/* Always show down arrow for Services when not collapsed */}
+              {item.id === "services" && (
+                <ChevronDownIcon className="w-4 h-4 ml-auto opacity-80" />
+              )}
+            </>
+          )}
         </a>
       </Button>
     )
@@ -90,9 +113,9 @@ export function AppSidebar({ currentPage }: AppSidebarProps) {
     if (!isCollapsed && item.id === "services" && isActive) {
       // Add icons for each service
       const allServices = [
+        { name: "Storage", href: "/app/services/storage", icon: CloudIcon },
         { name: "API Gateway", href: "/app/services/api-gateway", icon: GlobeAltIcon },
         { name: "Database", href: "/app/services/database", icon: CircleStackIcon },
-        { name: "Storage", href: "/app/services/storage", icon: CloudIcon },
         { name: "Compute", href: "/app/services/compute", icon: CpuChipIcon },
         { name: "Networking", href: "/app/services/networking", icon: Squares2X2Icon },
       ]
@@ -102,11 +125,16 @@ export function AppSidebar({ currentPage }: AppSidebarProps) {
           <div className="ml-8 mt-1 flex flex-col border-l border-border/40 pl-3 gap-1 max-h-80 overflow-y-auto pr-2">
             {allServices.map((service) => {
               const ServiceIcon = service.icon
+              const isSubActive = currentPath === service.href
               return (
                 <a
                   key={service.href}
                   href={service.href}
-                  className="flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground transition-colors py-1 px-2 rounded-md hover:bg-accent/30"
+                  className={`flex items-center gap-2 text-sm transition-colors py-1 px-2 rounded-md hover:bg-accent/30 ${
+                    isSubActive
+                      ? "bg-accent/40 text-foreground border border-primary"
+                      : "text-foreground/80 hover:text-foreground"
+                  }`}
                 >
                   <ServiceIcon className="w-4 h-4 flex-shrink-0 opacity-80" />
                   {service.name}
