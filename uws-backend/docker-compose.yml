@@ -1,0 +1,39 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: minicloud_postgres
+    environment:
+      POSTGRES_USER: minicloud
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: minicloud
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  # Redis for caching and job queues
+  redis:
+    image: redis:7-alpine
+    container_name: minicloud_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # PostgreSQL Admin Interface (optional)
+  adminer:
+    image: adminer
+    container_name: minicloud_adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

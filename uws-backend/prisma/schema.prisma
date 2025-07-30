@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  apps         App[]
+  deployments  Deployment[]
+  apiKeys      ApiKey[]
+  buckets      Bucket[]
+
+  @@map("users")
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  name      String
+  key       String   @unique
+  userId    String
+  createdAt DateTime @default(now())
+  lastUsed  DateTime?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+model App {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // App configuration
+  config      Json     @default("{}")
+  envVars     Json     @default("{}")
+  
+  // Resource limits
+  memoryLimit Int      @default(512)  // MB
+  cpuLimit    Float    @default(1.0)  // CPU cores
+  
+  // Relations
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deployments Deployment[]
+
+  @@map("apps")
+}
+
+model Deployment {
+  id        String           @id @default(cuid())
+  appId     String
+  userId    String
+  status    DeploymentStatus @default(PENDING)
+  version   String
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  // Deployment details
+  gitUrl      String?
+  gitBranch   String?
+  gitCommit   String?
+  buildLogs   String?
+  containerId String?
+  port        Int?
+  url         String?
+
+  // Relations
+  app  App  @relation(fields: [appId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("deployments")
+}
+
+model ResourceUsage {
+  id           String   @id @default(cuid())
+  appId        String
+  timestamp    DateTime @default(now())
+  
+  // Metrics
+  cpuUsage     Float    // Percentage
+  memoryUsage  Int      // MB
+  networkIn    Int      // Bytes
+  networkOut   Int      // Bytes
+  
+  @@map("resource_usage")
+}
+
+enum DeploymentStatus {
+  PENDING
+  BUILDING
+  DEPLOYING
+  RUNNING
+  FAILED
+  STOPPED
+}
+
+model Bucket {
+  id          String   @id @default(cuid())
+  name        String   @unique  // Actual bucket name in MinIO
+  displayName String             // User-friendly name
+  region      String   @default("us-east-1")
+  public      Boolean  @default(false)
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  objects StorageObject[]
+
+  @@map("buckets")
+}
+
+model StorageObject {
+  id          String   @id @default(cuid())
+  key         String              // Object key/path
+  bucketId    String
+  size        Int                 // Size in bytes
+  contentType String
+  etag        String
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  bucket Bucket @relation(fields: [bucketId], references: [id], onDelete: Cascade)
+
+  @@unique([bucketId, key])
+  @@map("storage_objects")
+}
