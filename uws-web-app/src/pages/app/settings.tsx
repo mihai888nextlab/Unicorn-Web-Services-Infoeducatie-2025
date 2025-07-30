@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { ResizableLayout } from "../../components/layout/resizable-layout"
+import { AuthGuard } from "@/components/auth/auth-guard"
 import { SettingsSidebar } from "../../components/settings/settings-sidebar"
 import { ProfileSection } from "../../components/settings/profile-section"
 import { NotificationsSection } from "../../components/settings/notifications-section"
@@ -49,6 +50,7 @@ export default function SettingsPage() {
   }
 
   return (
+    <AuthGuard>
     <>
       <ResizableLayout currentPage="settings">
         <ResizablePanelGroup direction="horizontal" className="h-full">
@@ -72,5 +74,6 @@ export default function SettingsPage() {
       </ResizableLayout>
       <AIChatbot />
     </>
+    </AuthGuard>
   )
 }

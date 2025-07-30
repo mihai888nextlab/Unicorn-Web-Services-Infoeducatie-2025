@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { ResizableLayout } from "@/components/layout/resizable-layout"
+import { AuthGuard } from "@/components/auth/auth-guard"
 import {
   DndContext,
   type DragEndEvent,
@@ -172,6 +173,7 @@ export default function Component() {
   const cardIds = sortedCards.map((card: any) => card.id)
 
   return (
+    <AuthGuard>
     <ResizableLayout currentPage="dashboard">
       <div className="flex h-full">
         <div className="flex-1 p-6 overflow-auto">
@@ -218,5 +220,6 @@ export default function Component() {
         </div>
       </div>
     </ResizableLayout>
+    </AuthGuard>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Card } from "@/components/ui/card"
+import { AuthGuard } from "@/components/auth/auth-guard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { EyeIcon, EyeSlashIcon, PlusIcon, KeyIcon, EllipsisHorizontalIcon } from "@heroicons/react/24/outline"
@@ -37,6 +38,7 @@ export default function SecretsManagerPage() {
   }
 
   return (
+    <AuthGuard>
     <ResizableLayout currentPage="services">
       <div className="p-6 h-full flex flex-col gap-6">
         <div className="flex items-center gap-4">
@@ -126,5 +128,6 @@ export default function SecretsManagerPage() {
         </div>
       </div>
     </ResizableLayout>
+    </AuthGuard>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Card } from "@/components/ui/card"
+import { AuthGuard } from "@/components/auth/auth-guard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ArchiveBoxIcon, FolderIcon, DocumentIcon, ArrowPathIcon } from "@heroicons/react/24/outline"
@@ -61,6 +62,7 @@ export default function StoragePage() {
   const bucket = demoBuckets.find(b => b.name === selectedBucket)
 
   return (
+    <AuthGuard>
     <AppProviders>
       <ResizableLayout currentPage="services">
         <div className="p-6 h-full flex flex-col gap-6">
@@ -143,5 +145,6 @@ export default function StoragePage() {
         </div>
       </ResizableLayout>
     </AppProviders>
+    </AuthGuard>
   )
 }
