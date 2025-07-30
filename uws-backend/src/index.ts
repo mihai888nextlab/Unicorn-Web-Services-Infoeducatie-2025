@@ -25,6 +25,13 @@ async function registerPlugins() {
     credentials: true,
   });
 
+  // Multipart support for file uploads
+  await fastify.register(import("@fastify/multipart"), {
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+  });
+
   // JWT
   await fastify.register(jwt, {
     secret: process.env.JWT_SECRET || "your-secret-key",
@@ -69,6 +76,8 @@ async function registerRoutes() {
     // Import routes
     const { default: authRoutes } = await import("./routes/auth.js");
     const { default: appRoutes } = await import("./routes/apps.js");
+    const deploymentRoutes = require("./routes/deployments");
+    const storageRoutes = require("./routes/storage");
 
     // Authentication routes
     fastify.register(authRoutes, { prefix: "/api/auth" });
@@ -76,8 +85,11 @@ async function registerRoutes() {
     // App management routes
     fastify.register(appRoutes, { prefix: "/api/apps" });
 
-    // Deployment routes (coming next)
-    // fastify.register(deploymentRoutes, { prefix: '/api/deployments' })
+    // Deployment routes
+    fastify.register(deploymentRoutes, { prefix: "/api" });
+
+    // Storage routes (S3-compatible)
+    fastify.register(storageRoutes, { prefix: "/api/storage" });
   });
 }
 
