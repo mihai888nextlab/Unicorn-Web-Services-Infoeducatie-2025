@@ -24,6 +24,12 @@ import { ChartCard } from "@/components/dashboard/cards/chart-card";
 import { RecentActivityCard } from "@/components/dashboard/cards/recent-activity-card";
 import { ServicesGridCard } from "@/components/dashboard/cards/services-grid-card";
 import { QuickStatsCard } from "@/components/dashboard/cards/quick-stats-card";
+import { StorageCard } from "@/components/dashboard/cards/storage-card";
+import { DatabaseCard } from "@/components/dashboard/cards/database-card";
+import { ComputeCard } from "@/components/dashboard/cards/compute-card";
+import { LambdaCard } from "@/components/dashboard/cards/lambda-card";
+import { QueueCard } from "@/components/dashboard/cards/queue-card";
+import { SecretsCard } from "@/components/dashboard/cards/secrets-card";
 import { useDashboard } from "@/components/dashboard/dashboard-context";
 import { layoutStyles } from "@/components/dashboard/dashboard-templates";
 import {
@@ -180,6 +186,73 @@ const Dashboard: NextPageWithLayout = () => {
                   },
                 ]
               }
+              size={card.size}
+              onRemove={removeCard}
+            />
+          </SortableCard>
+        );
+      // Service Cards
+      case "storage-service":
+        return (
+          <SortableCard key={card.id} id={card.id}>
+            <StorageCard
+              id={card.id}
+              title={card.title}
+              size={card.size}
+              onRemove={removeCard}
+            />
+          </SortableCard>
+        );
+      case "database-service":
+        return (
+          <SortableCard key={card.id} id={card.id}>
+            <DatabaseCard
+              id={card.id}
+              title={card.title}
+              size={card.size}
+              onRemove={removeCard}
+            />
+          </SortableCard>
+        );
+      case "compute-service":
+        return (
+          <SortableCard key={card.id} id={card.id}>
+            <ComputeCard
+              id={card.id}
+              title={card.title}
+              size={card.size}
+              onRemove={removeCard}
+            />
+          </SortableCard>
+        );
+      case "lambda-service":
+        return (
+          <SortableCard key={card.id} id={card.id}>
+            <LambdaCard
+              id={card.id}
+              title={card.title}
+              size={card.size}
+              onRemove={removeCard}
+            />
+          </SortableCard>
+        );
+      case "queue-service":
+        return (
+          <SortableCard key={card.id} id={card.id}>
+            <QueueCard
+              id={card.id}
+              title={card.title}
+              size={card.size}
+              onRemove={removeCard}
+            />
+          </SortableCard>
+        );
+      case "secrets-service":
+        return (
+          <SortableCard key={card.id} id={card.id}>
+            <SecretsCard
+              id={card.id}
+              title={card.title}
               size={card.size}
               onRemove={removeCard}
             />

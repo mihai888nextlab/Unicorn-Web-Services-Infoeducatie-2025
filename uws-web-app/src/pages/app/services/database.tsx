@@ -1246,7 +1246,7 @@ export default function DatabasePage() {
             {/* PostgreSQL Database List */}
             <div className="w-80 flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <h2 className="font-semibold">PostgreSQL Clusters</h2>
+                <h2 className="font-semibold">Clusters</h2>
                 <Dialog open={pgAdding} onOpenChange={setPgAdding}>
                   <DialogTrigger asChild>
                     <Button size="sm">
@@ -1254,7 +1254,7 @@ export default function DatabasePage() {
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-                    <DialogTitle>Create PostgreSQL Database Cluster</DialogTitle>
+                    <DialogTitle>Create Database Cluster</DialogTitle>
                     <div className="flex flex-col gap-4 mt-4">
                       <div>
                         <Label htmlFor="pg-name">Cluster Name*</Label>
