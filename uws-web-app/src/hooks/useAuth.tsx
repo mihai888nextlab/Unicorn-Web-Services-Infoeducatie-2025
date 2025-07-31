@@ -1,5 +1,3 @@
-"use client";
-
 import { User } from "@/types/types";
 import { useRouter } from "next/router";
 import React, {
@@ -100,9 +98,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     // Check password complexity
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
     if (!passwordRegex.test(password)) {
-      setError("Password must contain uppercase, lowercase, number, and special character");
+      setError(
+        "Password must contain uppercase, lowercase, number, and special character"
+      );
       setLoading(false);
       return;
     }

@@ -22,6 +22,7 @@ import {
   PlusIcon,
   ArrowDownTrayIcon,
   EyeIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { ResizableLayout } from "@/components/layout/resizable-layout";
 import type { NextPageWithLayout } from "../../_app";
@@ -90,6 +91,11 @@ const StoragePage: NextPageWithLayout = () => {
   // Duplicate file warning state
   const [duplicateFiles, setDuplicateFiles] = useState<string[]>([]);
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+
+  // Delete confirmation state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [objectToDelete, setObjectToDelete] = useState<StorageObject | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const bucket = buckets.find((b) => b.name === selectedBucket);
 
@@ -405,6 +411,50 @@ const StoragePage: NextPageWithLayout = () => {
     } finally {
       setPreviewLoading(false);
     }
+  };
+
+  const deleteFile = async () => {
+    if (!objectToDelete || !selectedBucket) return;
+
+    try {
+      setDeleteLoading(true);
+      
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
+        setError("No authentication token found");
+        return;
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/storage/buckets/${selectedBucket}/objects/${encodeURIComponent(objectToDelete.key)}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete file: ${response.status}`);
+      }
+
+      // Close modal and refresh objects
+      setIsDeleteModalOpen(false);
+      setObjectToDelete(null);
+      await fetchBucketObjects(selectedBucket);
+      
+    } catch (err) {
+      console.error("Error deleting file:", err);
+      setError(err instanceof Error ? err.message : "Failed to delete file");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (object: StorageObject) => {
+    setObjectToDelete(object);
+    setIsDeleteModalOpen(true);
   };
 
   const getFileType = (key: string): string => {
@@ -829,6 +879,62 @@ const StoragePage: NextPageWithLayout = () => {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
+          {/* Delete Confirmation Dialog */}
+          <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Delete File</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete this file? This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              
+              {objectToDelete && (
+                <div className="py-4">
+                  <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                    <DocumentIcon className="w-5 h-5 text-muted-foreground" />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{objectToDelete.key}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatSize(objectToDelete.size)} • {objectToDelete.lastModified}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsDeleteModalOpen(false);
+                    setObjectToDelete(null);
+                  }}
+                  disabled={deleteLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={deleteFile}
+                  disabled={deleteLoading}
+                >
+                  {deleteLoading ? (
+                    <>
+                      <ArrowPathIcon className="w-4 h-4 mr-1 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <TrashIcon className="w-4 h-4 mr-1" />
+                      Delete File
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -991,6 +1097,15 @@ const StoragePage: NextPageWithLayout = () => {
                                   title="Download"
                                 >
                                   <ArrowDownTrayIcon className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteClick(obj)}
+                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  title="Delete"
+                                >
+                                  <TrashIcon className="w-4 h-4" />
                                 </Button>
                               </div>
                             </td>
