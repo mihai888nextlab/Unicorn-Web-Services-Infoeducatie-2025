@@ -183,7 +183,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       return false;
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      //   console.error("Error fetching user data:", error);
       //   setUser(null);
       return false;
     } finally {
