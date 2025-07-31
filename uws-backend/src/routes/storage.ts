@@ -373,4 +373,4 @@ async function storageRoutes(fastify: FastifyInstance) {
   );
 }
 
-module.exports = storageRoutes;
+export default storageRoutes;

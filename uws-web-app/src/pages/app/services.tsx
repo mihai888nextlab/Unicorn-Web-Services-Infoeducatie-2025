@@ -3,7 +3,6 @@
 import { useState } from "react"
 import type { ReactElement } from "react"
 import { ResizableLayout } from "../../components/layout/resizable-layout"
-import { AuthGuard } from "@/components/auth/auth-guard"
 import { ServicesHeader } from "../../components/services/services-header"
 import { ServicesGrid } from "../../components/services/services-grid"
 import { AIChatbot } from "../../components/ai-chatbot"
@@ -18,7 +17,6 @@ const ServicesPage: NextPageWithLayout = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
 
   return (
-    <AuthGuard>
     <>
       <div className="p-6 h-full overflow-auto">
         <ServicesHeader
@@ -47,7 +45,6 @@ const ServicesPage: NextPageWithLayout = () => {
       </div>
       <AIChatbot />
     </>
-    </AuthGuard>
   )
 };
 

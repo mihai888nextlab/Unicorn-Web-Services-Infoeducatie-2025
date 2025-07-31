@@ -13,7 +13,6 @@ import {
   DocumentTextIcon,
 } from "@heroicons/react/24/outline"
 import { ResizableLayout } from "../../components/layout/resizable-layout"
-import { AuthGuard } from "../../components/auth/auth-guard"
 import { CurrentBillSummary } from "../../components/billing/current-bill-summary"
 import { UsageCard } from "../../components/billing/usage-card"
 import { InvoiceCard } from "../../components/billing/invoice-card"
@@ -87,7 +86,6 @@ const BillingPage: NextPageWithLayout = () => {
   const totalCurrentCost = currentUsage.reduce((sum, service) => sum + service.cost, 0)
 
   return (
-    <AuthGuard>
     <>
       <div className="p-6 h-full overflow-auto">
         <div className="mb-8">
@@ -166,7 +164,6 @@ const BillingPage: NextPageWithLayout = () => {
       </div>
       <AIChatbot />
     </>
-    </AuthGuard>
   )
 };
 

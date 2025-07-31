@@ -177,7 +177,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const data = await response.json();
       setUser(data);
 
-      if (data.user) {
+      if (data) {
         return true;
       }
 

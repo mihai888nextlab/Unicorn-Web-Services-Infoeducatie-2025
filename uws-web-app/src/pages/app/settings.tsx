@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import type { ReactElement } from "react"
 import { ResizableLayout } from "../../components/layout/resizable-layout"
-import { AuthGuard } from "@/components/auth/auth-guard"
 import { SettingsSidebar } from "../../components/settings/settings-sidebar"
 import { ProfileSection } from "../../components/settings/profile-section"
 import { NotificationsSection } from "../../components/settings/notifications-section"
@@ -52,7 +51,6 @@ const SettingsPage: NextPageWithLayout = () => {
   }
 
   return (
-    <AuthGuard>
     <>
       <ResizablePanelGroup direction="horizontal" className="h-full">
         {/* Settings Sidebar Panel - Uses persisted width */}
@@ -74,7 +72,6 @@ const SettingsPage: NextPageWithLayout = () => {
       </ResizablePanelGroup>
       <AIChatbot />
     </>
-    </AuthGuard>
   )
 };
 

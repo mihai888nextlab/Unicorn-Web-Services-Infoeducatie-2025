@@ -18,9 +18,10 @@ import {
   KeyIcon,
   GlobeAltIcon,
   ChevronDownIcon,
+  BoltIcon,
+  QueueListIcon,
 } from "@heroicons/react/24/outline"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/router"
 
 interface AppSidebarProps {
   currentPage?: string
@@ -62,24 +63,22 @@ export function AppSidebar({ currentPage }: AppSidebarProps) {
     { href: "/app/services", icon: ServerIcon, label: "Services", id: "services" },
     { href: "/app/monitoring", icon: ChartBarIcon, label: "Monitoring", id: "monitoring" },
     { href: "/app/billing", icon: CreditCardIcon, label: "Billing", id: "billing" },
-    { href: "/app/users", icon: UsersIcon, label: "IAM", id: "iam" },
+    { href: "/app/iam", icon: UsersIcon, label: "IAM", id: "iam" },
     { href: "/app/settings", icon: Cog6ToothIcon, label: "Settings", id: "settings" },
   ]
 
   const SidebarButton = ({ item }: { item: (typeof navItems)[0] }) => {
-    // Use Next.js router for current path
-    let currentPath = ""
-    try {
-      // next/router is only available in client components
-      // fallback to window.location if router is not available
-      // (for non-Next.js environments)
-      // This will work in Next.js pages and app directory
-      // @ts-ignore
-      const usePathname = require('next/navigation').usePathname
-      currentPath = usePathname ? usePathname() : (typeof window !== "undefined" ? window.location.pathname : "")
-    } catch {
-      currentPath = typeof window !== "undefined" ? window.location.pathname : ""
-    }
+    const [currentPath, setCurrentPath] = useState("")
+    const [mounted, setMounted] = useState(false)
+    
+    useEffect(() => {
+      // Only set current path on client side to avoid hydration mismatch
+      setMounted(true)
+      if (typeof window !== "undefined") {
+        setCurrentPath(window.location.pathname)
+      }
+    }, [])
+    
     const IconComponent = item.icon
     const isActive = currentPage === item.id
 
@@ -114,11 +113,11 @@ export function AppSidebar({ currentPage }: AppSidebarProps) {
       // Add icons for each service
       const allServices = [
         { name: "Storage", href: "/app/services/storage", icon: CloudIcon },
-        { name: "API Gateway", href: "/app/services/api-gateway", icon: GlobeAltIcon },
         { name: "Database", href: "/app/services/database", icon: CircleStackIcon },
         { name: "Compute", href: "/app/services/compute", icon: CpuChipIcon },
+        { name: "Lambda", href: "/app/services/lambda", icon: BoltIcon },
+        { name: "Queue", href: "/app/services/queue", icon: QueueListIcon },
         { name: "Secrets Manager", href: "/app/services/secrets", icon: KeyIcon },
-        { name: "Networking", href: "/app/services/networking", icon: Squares2X2Icon },
       ]
       return (
         <div>
@@ -126,7 +125,7 @@ export function AppSidebar({ currentPage }: AppSidebarProps) {
           <div className="ml-8 mt-1 flex flex-col border-l border-border/40 pl-3 gap-1 max-h-80 overflow-y-auto pr-2">
             {allServices.map((service) => {
               const ServiceIcon = service.icon
-              const isSubActive = currentPath === service.href
+              const isSubActive = mounted && currentPath === service.href
               return (
                 <a
                   key={service.href}
