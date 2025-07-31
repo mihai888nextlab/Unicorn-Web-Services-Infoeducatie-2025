@@ -230,10 +230,16 @@ export default function ComputePage() {
         const data = await response.json()
         console.log("Services API response:", data)
         setServices(Array.isArray(data) ? data : [])
-      } else if (response.status === 404) {
-        setServices([])
       } else {
-        throw new Error(`Failed to fetch services: ${response.status}`)
+        console.error(`Compute API returned status: ${response.status}`)
+        setServices([])
+        if (response.status === 500) {
+          setError("Compute service is currently unavailable. Please try again later.")
+        } else if (response.status === 404) {
+          // No services found is not an error
+        } else {
+          setError(`Failed to fetch services: ${response.status}`)
+        }
       }
     } catch (err) {
       console.error("Error fetching services:", err)

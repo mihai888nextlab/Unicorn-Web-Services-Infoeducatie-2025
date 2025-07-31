@@ -33,15 +33,25 @@ import { useAuth } from "@/hooks/useAuth"
 
 // Types for Queue Service
 interface Queue {
+  id: string;
   name: string;
+  displayName: string;
   description?: string;
   tier: string;
   fifo: boolean;
-  url?: string;
-  messagesVisible?: number;
-  messagesInFlight?: number;
-  messagesDelayed?: number;
+  queueUrl: string;
+  status: string;
+  approximateNumberOfMessages?: number;
+  approximateNumberOfMessagesInFlight?: number;
+  approximateNumberOfMessagesDelayed?: number;
   createdAt: string;
+  config?: {
+    maxMessages: number;
+    maxMessageSize: number;
+    retentionPeriod: number;
+    visibilityTimeout: number;
+    price: number;
+  };
 }
 
 interface Message {
@@ -50,7 +60,10 @@ interface Message {
   body: string;
   messageAttributes?: { [key: string]: any };
   md5OfBody: string;
-  sentTimestamp: string;
+  attributes?: {
+    approximateReceiveCount: string;
+    approximateFirstReceiveTimestamp: string;
+  };
 }
 
 interface QueueConfigs {
@@ -60,12 +73,19 @@ interface QueueConfigs {
 }
 
 interface QueueMetrics {
-  messagesVisible: number;
-  messagesInFlight: number;
-  messagesDelayed: number;
-  messagesSent: number;
-  messagesReceived: number;
-  messagesDeleted: number;
+  queueName: string;
+  period: string;
+  messageStats: {
+    available: number;
+    in_flight: number;
+    delayed: number;
+  };
+  timeSeries: Array<{
+    timestamp: string;
+    messagesSent: number;
+    messagesReceived: number;
+    messagesDeleted: number;
+  }>;
 }
 
 export default function QueuePage() {
@@ -75,7 +95,7 @@ export default function QueuePage() {
   
   // Queue management state
   const [queues, setQueues] = useState<Queue[]>([])
-  const [, setQueueConfigs] = useState<QueueConfigs>({})
+  const [, setQueueConfigs] = useState<QueueConfigs | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
@@ -93,10 +113,10 @@ export default function QueuePage() {
   
   // Selected queue and messages
   const [selectedQueue, setSelectedQueue] = useState<Queue | null>(null)
-  const [queueDetails, setQueueDetails] = useState<Queue | null>(null)
+  const [queueDetails, setQueueDetails] = useState<any | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [queueMetrics, setQueueMetrics] = useState<QueueMetrics | null>(null)
-  const [, ] = useState(false)
+  const [messagesLoading, setMessagesLoading] = useState(false)
   const [metricsLoading, setMetricsLoading] = useState(false)
   
   // Message management state
@@ -721,7 +741,7 @@ export default function QueuePage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${getStatusColor(queue.messagesVisible)}`} />
+                        <div className={`w-2 h-2 rounded-full ${getStatusColor(queue.approximateNumberOfMessages)}`} />
                         {queue.fifo && <Badge variant="outline" className="text-xs">FIFO</Badge>}
                       </div>
                     </div>
@@ -730,7 +750,7 @@ export default function QueuePage() {
                       <div className="flex items-center gap-3">
                         {getTierBadge(queue.tier)}
                         <span className="text-muted-foreground">
-                          {queue.messagesVisible || 0} msgs
+                          {queue.approximateNumberOfMessages || 0} msgs
                         </span>
                       </div>
                       
@@ -796,15 +816,15 @@ export default function QueuePage() {
                   {queueDetails && (
                     <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
                       <div className="text-center">
-                        <div className="font-medium text-blue-600">{queueDetails.messagesVisible || 0}</div>
+                        <div className="font-medium text-blue-600">{queueDetails.approximateNumberOfMessages || 0}</div>
                         <div className="text-muted-foreground">Available</div>
                       </div>
                       <div className="text-center">
-                        <div className="font-medium text-yellow-600">{queueDetails.messagesInFlight || 0}</div>
+                        <div className="font-medium text-yellow-600">{queueDetails.approximateNumberOfMessagesInFlight || 0}</div>
                         <div className="text-muted-foreground">In Flight</div>
                       </div>
                       <div className="text-center">
-                        <div className="font-medium text-gray-600">{queueDetails.messagesDelayed || 0}</div>
+                        <div className="font-medium text-gray-600">{queueDetails.approximateNumberOfMessagesDelayed || 0}</div>
                         <div className="text-muted-foreground">Delayed</div>
                       </div>
                     </div>
@@ -878,7 +898,9 @@ export default function QueuePage() {
                               <div>
                                 <div className="font-mono text-sm">{message.messageId}</div>
                                 <div className="text-xs text-muted-foreground">
-                                  {new Date(message.sentTimestamp).toLocaleString()}
+                                  {message.attributes?.approximateFirstReceiveTimestamp 
+                                    ? new Date(parseInt(message.attributes.approximateFirstReceiveTimestamp)).toLocaleString()
+                                    : 'Unknown'}
                                 </div>
                               </div>
                             </div>
@@ -968,7 +990,7 @@ export default function QueuePage() {
                           <EyeIcon className="w-5 h-5 text-blue-500" />
                         </div>
                         <div>
-                          <div className="text-2xl font-bold">{queueMetrics.messagesVisible}</div>
+                          <div className="text-2xl font-bold">{queueMetrics.messageStats.available}</div>
                           <div className="text-sm text-muted-foreground">Messages Available</div>
                         </div>
                       </div>
@@ -980,7 +1002,7 @@ export default function QueuePage() {
                           <CpuChipIcon className="w-5 h-5 text-yellow-500" />
                         </div>
                         <div>
-                          <div className="text-2xl font-bold">{queueMetrics.messagesInFlight}</div>
+                          <div className="text-2xl font-bold">{queueMetrics.messageStats.in_flight}</div>
                           <div className="text-sm text-muted-foreground">Messages In Flight</div>
                         </div>
                       </div>
@@ -992,7 +1014,7 @@ export default function QueuePage() {
                           <ClockIcon className="w-5 h-5 text-gray-500" />
                         </div>
                         <div>
-                          <div className="text-2xl font-bold">{queueMetrics.messagesDelayed}</div>
+                          <div className="text-2xl font-bold">{queueMetrics.messageStats.delayed}</div>
                           <div className="text-sm text-muted-foreground">Messages Delayed</div>
                         </div>
                       </div>
@@ -1004,7 +1026,7 @@ export default function QueuePage() {
                           <PaperAirplaneIcon className="w-5 h-5 text-green-500" />
                         </div>
                         <div>
-                          <div className="text-2xl font-bold">{queueMetrics.messagesSent}</div>
+                          <div className="text-2xl font-bold">{queueMetrics.timeSeries.reduce((sum, ts) => sum + ts.messagesSent, 0)}</div>
                           <div className="text-sm text-muted-foreground">Messages Sent</div>
                         </div>
                       </div>
@@ -1016,7 +1038,7 @@ export default function QueuePage() {
                           <InboxIcon className="w-5 h-5 text-purple-500" />
                         </div>
                         <div>
-                          <div className="text-2xl font-bold">{queueMetrics.messagesReceived}</div>
+                          <div className="text-2xl font-bold">{queueMetrics.timeSeries.reduce((sum, ts) => sum + ts.messagesReceived, 0)}</div>
                           <div className="text-sm text-muted-foreground">Messages Received</div>
                         </div>
                       </div>
@@ -1028,7 +1050,7 @@ export default function QueuePage() {
                           <TrashIcon className="w-5 h-5 text-red-500" />
                         </div>
                         <div>
-                          <div className="text-2xl font-bold">{queueMetrics.messagesDeleted}</div>
+                          <div className="text-2xl font-bold">{queueMetrics.timeSeries.reduce((sum, ts) => sum + ts.messagesDeleted, 0)}</div>
                           <div className="text-sm text-muted-foreground">Messages Deleted</div>
                         </div>
                       </div>

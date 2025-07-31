@@ -116,7 +116,16 @@ const StoragePage: NextPageWithLayout = () => {
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch objects: ${response.status}`);
+        console.error(`Storage API returned status: ${response.status}`);
+        setObjects([]);
+        if (response.status === 500) {
+          setError("Storage service is currently unavailable. Please try again later.");
+        } else if (response.status === 404) {
+          // No objects found is not an error
+        } else {
+          setError(`Failed to fetch objects: ${response.status}`);
+        }
+        return;
       }
 
       const data = await response.json();
@@ -153,7 +162,16 @@ const StoragePage: NextPageWithLayout = () => {
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch buckets: ${response.status}`);
+        console.error(`Storage API returned status: ${response.status}`);
+        setBuckets([]);
+        if (response.status === 500) {
+          setError("Storage service is currently unavailable. Please try again later.");
+        } else if (response.status === 404) {
+          // No buckets found is not an error
+        } else {
+          setError(`Failed to fetch buckets: ${response.status}`);
+        }
+        return;
       }
 
       const data = await response.json();

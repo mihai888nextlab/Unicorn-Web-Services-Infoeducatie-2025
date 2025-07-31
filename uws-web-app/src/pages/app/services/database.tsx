@@ -608,9 +608,60 @@ export default function DatabasePage() {
     }
   }
 
+  // Helper function to get nested value from object
+  const getNestedValue = (obj: any, path: string): any => {
+    const keys = path.split('.')
+    let current = obj
+    for (const key of keys) {
+      if (current && typeof current === 'object' && key in current) {
+        current = current[key]
+      } else {
+        return undefined
+      }
+    }
+    return current
+  }
+
+  // Helper function to check if document matches filter
+  const matchesFilter = (doc: any, filter: any): boolean => {
+    return Object.entries(filter).every(([key, value]) => {
+      const docValue = getNestedValue(doc, key)
+      
+      // Handle MongoDB-style operators
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        if ('$eq' in value) return docValue === value.$eq
+        if ('$ne' in value) return docValue !== value.$ne
+        if ('$gt' in value) return docValue > value.$gt
+        if ('$gte' in value) return docValue >= value.$gte
+        if ('$lt' in value) return docValue < value.$lt
+        if ('$lte' in value) return docValue <= value.$lte
+        if ('$in' in value && Array.isArray(value.$in)) return value.$in.includes(docValue)
+        if ('$nin' in value && Array.isArray(value.$nin)) return !value.$nin.includes(docValue)
+        if ('$regex' in value) {
+          try {
+            const regex = new RegExp(value.$regex, value.$options || 'i')
+            return regex.test(String(docValue))
+          } catch {
+            return false
+          }
+        }
+        if ('$exists' in value) {
+          const exists = docValue !== undefined && docValue !== null
+          return value.$exists ? exists : !exists
+        }
+      }
+      
+      // Direct equality comparison
+      return docValue === value
+    })
+  }
+
   // Query documents
   const queryDocuments = async () => {
-    if (!selectedCollection) return
+    if (!selectedCollection || !selectedDatabase) {
+      setError("Please select a database and collection first")
+      return
+    }
 
     try {
       setQueryLoading(true)
@@ -623,44 +674,95 @@ export default function DatabasePage() {
       let sort = {}
       
       try {
-        if (queryFilter.trim()) {
+        if (queryFilter.trim() && queryFilter.trim() !== "{}") {
           filter = JSON.parse(queryFilter)
         }
-        if (querySort.trim()) {
+        if (querySort.trim() && querySort.trim() !== "{}") {
           sort = JSON.parse(querySort)
         }
       } catch (e) {
-        setError("Invalid JSON in query parameters")
+        setError("Invalid JSON in query parameters. Please check your filter and sort syntax.")
+        setQueryLoading(false)
         return
       }
 
+      console.log("Querying collection:", selectedCollection.id, {
+        filter,
+        limit: parseInt(queryLimit) || 100,
+        skip: parseInt(querySkip) || 0,
+        sort: Object.keys(sort).length > 0 ? sort : undefined,
+      })
+
+      // Use scan endpoint to get all documents
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/nosql/collections/${selectedCollection.id}/query`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/nosql/collections/${selectedCollection.id}/scan`,
         {
-          method: "POST",
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            filter,
-            limit: parseInt(queryLimit) || 100,
-            skip: parseInt(querySkip) || 0,
-            sort: Object.keys(sort).length > 0 ? sort : undefined,
-          }),
         }
       )
 
       if (response.ok) {
         const data = await response.json()
-        setQueryResults(Array.isArray(data) ? data : [])
+        console.log("Query response:", data)
+        
+        // Get all documents
+        let allDocuments = []
+        if (Array.isArray(data)) {
+          allDocuments = data
+        } else if (data.documents && Array.isArray(data.documents)) {
+          allDocuments = data.documents
+        }
+        
+        // Apply client-side filtering
+        let results = allDocuments
+        if (Object.keys(filter).length > 0) {
+          results = allDocuments.filter(doc => {
+            const docData = doc.data || doc
+            return matchesFilter(docData, filter)
+          })
+        }
+        
+        // Apply sorting
+        if (Object.keys(sort).length > 0) {
+          results.sort((a, b) => {
+            for (const [key, order] of Object.entries(sort)) {
+              const aData = a.data || a
+              const bData = b.data || b
+              const aVal = getNestedValue(aData, key)
+              const bVal = getNestedValue(bData, key)
+              
+              if (aVal < bVal) return order === 1 ? -1 : 1
+              if (aVal > bVal) return order === 1 ? 1 : -1
+            }
+            return 0
+          })
+        }
+        
+        // Apply pagination
+        const skip = parseInt(querySkip) || 0
+        const limit = parseInt(queryLimit) || 100
+        const paginatedResults = results.slice(skip, skip + limit)
+        
+        console.log(`Filtered ${results.length} documents, showing ${paginatedResults.length}`)
+        setQueryResults(paginatedResults)
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.message || errorData.error || errorData.detail || `Query failed: ${response.status}`
+        setError(errorMessage)
+        console.error("Query error:", errorMessage, errorData)
+        setQueryResults([])
       }
     } catch (err) {
       console.error("Error querying documents:", err)
       setError(err instanceof Error ? err.message : "Failed to query documents")
-      setTimeout(() => setError(null), 5000)
+      setQueryResults([])
     } finally {
       setQueryLoading(false)
+      setTimeout(() => setError(null), 5000)
     }
   }
 
@@ -1863,7 +1965,7 @@ export default function DatabasePage() {
                       <div className="flex items-center gap-3">
                         <Label>Instances:</Label>
                         <Select 
-                          value={selectedPgDatabase ? selectedPgDatabase.instances.toString() : "1"} 
+                          value={selectedPgDatabase?.instances?.toString() ?? "1"}
                           onValueChange={(value) => selectedPgDatabase && scalePostgreSQLDatabase(selectedPgDatabase.id, parseInt(value))}
                           disabled={pgActionLoading !== null || !selectedPgDatabase}
                         >
@@ -2289,14 +2391,24 @@ export default function DatabasePage() {
               {queryResults.length > 0 && (
                 <div>
                   <Label>Results ({queryResults.length} documents)</Label>
-                  <div className="mt-2 max-h-96 overflow-y-auto border rounded-lg p-3 bg-black/5">
+                  <div className="mt-2 max-h-96 overflow-y-auto border rounded-lg p-3 bg-muted/30">
                     {queryResults.map((doc, idx) => (
-                      <div key={idx} className="mb-4 last:mb-0">
-                        <div className="text-xs text-muted-foreground mb-1">
-                          Document ID: {doc.documentId}
+                      <div key={idx} className="mb-3 p-3 bg-background rounded-lg">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <DocumentTextIcon className="w-4 h-4 text-muted-foreground mt-1" />
+                            <div>
+                              <div className="font-mono text-sm">{doc.documentId || doc._id || `Document ${idx + 1}`}</div>
+                              {doc.createdAt && (
+                                <div className="text-xs text-muted-foreground">
+                                  Created: {new Date(doc.createdAt).toLocaleString()}
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <pre className="text-xs font-mono bg-white p-2 rounded">
-                          {JSON.stringify(doc.data, null, 2)}
+                        <pre className="text-xs font-mono bg-black/5 p-2 rounded overflow-x-auto">
+                          {JSON.stringify(doc.data || doc, null, 2)}
                         </pre>
                       </div>
                     ))}
