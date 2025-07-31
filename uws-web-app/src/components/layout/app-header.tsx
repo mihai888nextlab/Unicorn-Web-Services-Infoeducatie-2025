@@ -17,21 +17,7 @@ export function AppHeader() {
           </div>
         </div>
         <div className="flex items-center space-x-4">
-          <div className="relative">
-            <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search services..."
-              className="pl-10 pr-4 py-2 border border-input bg-background rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-sm w-64"
-            />
-          </div>
-          <Button variant="outline" size="icon">
-            <BellIcon className="w-4 h-4" />
-          </Button>
           <ThemeToggle />
-          <Button variant="outline" size="icon">
-            <Cog6ToothIcon className="w-4 h-4" />
-          </Button>
         </div>
       </div>
     </header>

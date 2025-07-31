@@ -31,6 +31,7 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline"
 import { ResizableLayout } from "@/components/layout/resizable-layout"
+import { Statistics } from "@/lib/statistics"
 
 // Types
 interface Metric {
@@ -731,20 +732,109 @@ export default function MonitoringPage() {
                           </div>
 
                           {/* Statistics Summary */}
-                          <div className="grid grid-cols-4 gap-4">
-                            {["average", "maximum", "minimum", "sum"].map((stat) => {
-                              const lastDatapoint = metricStatistics.datapoints[metricStatistics.datapoints.length - 1]
-                              const value = lastDatapoint[stat as keyof MetricDatapoint] as number
-                              return (
-                                <div key={stat} className="text-center">
-                                  <div className="text-sm text-muted-foreground">{stat.charAt(0).toUpperCase() + stat.slice(1)}</div>
+                          <div className="grid grid-cols-5 gap-4">
+                            {(() => {
+                              // Calculate comprehensive statistics from all datapoints
+                              const values: number[] = []
+                              metricStatistics.datapoints.forEach(dp => {
+                                if (dp.average !== undefined) values.push(dp.average)
+                              })
+                              
+                              const stats = Statistics.calculate(values)
+                              const statLabels = [
+                                { key: "min", label: "Minimum", value: stats.min },
+                                { key: "max", label: "Maximum", value: stats.max },
+                                { key: "sum", label: "Sum", value: stats.sum },
+                                { key: "avg", label: "Average", value: stats.avg },
+                                { key: "p95", label: "95th Percentile", value: stats.p95 }
+                              ]
+                              
+                              return statLabels.map((stat) => (
+                                <div key={stat.key} className="text-center">
+                                  <div className="text-sm text-muted-foreground">{stat.label}</div>
                                   <div className="text-2xl font-bold">
-                                    {value ? value.toFixed(2) : "N/A"}
+                                    {Statistics.formatValue(stat.value, selectedMetric?.unit || "")}
                                   </div>
                                 </div>
-                              )
-                            })}
+                              ))
+                            })()}
                           </div>
+                          
+                          {/* Detailed Statistics Card */}
+                          <Card className="mt-4">
+                            <CardHeader>
+                              <CardTitle className="text-lg">Statistical Analysis</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              {(() => {
+                                const values: number[] = []
+                                metricStatistics.datapoints.forEach(dp => {
+                                  if (dp.average !== undefined) values.push(dp.average)
+                                })
+                                
+                                const stats = Statistics.calculate(values)
+                                const hourlyStats = Statistics.aggregateByHour(
+                                  metricStatistics.datapoints.map(dp => ({
+                                    timestamp: dp.timestamp,
+                                    value: dp.average || 0
+                                  }))
+                                )
+                                
+                                return (
+                                  <div className="space-y-4">
+                                    <div className="grid grid-cols-3 gap-4">
+                                      <div className="text-center p-4 bg-muted rounded-lg">
+                                        <div className="text-sm text-muted-foreground mb-1">Sample Count</div>
+                                        <div className="text-xl font-bold">{stats.count}</div>
+                                      </div>
+                                      <div className="text-center p-4 bg-muted rounded-lg">
+                                        <div className="text-sm text-muted-foreground mb-1">Range</div>
+                                        <div className="text-xl font-bold">
+                                          {Statistics.formatValue(stats.max - stats.min, selectedMetric?.unit || "")}
+                                        </div>
+                                      </div>
+                                      <div className="text-center p-4 bg-muted rounded-lg">
+                                        <div className="text-sm text-muted-foreground mb-1">Hourly Data Points</div>
+                                        <div className="text-xl font-bold">{Object.keys(hourlyStats).length}</div>
+                                      </div>
+                                    </div>
+                                    
+                                    {Object.keys(hourlyStats).length > 0 && (
+                                      <div>
+                                        <h4 className="font-medium mb-2">Hourly Breakdown (Last 6 Hours)</h4>
+                                        <div className="border rounded-lg overflow-hidden">
+                                          <table className="w-full text-sm">
+                                            <thead className="bg-muted">
+                                              <tr>
+                                                <th className="px-3 py-2 text-left">Hour</th>
+                                                <th className="px-3 py-2 text-right">Min</th>
+                                                <th className="px-3 py-2 text-right">Max</th>
+                                                <th className="px-3 py-2 text-right">Avg</th>
+                                                <th className="px-3 py-2 text-right">P95</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              {Object.entries(hourlyStats).slice(-6).map(([hour, hourlyData]) => (
+                                                <tr key={hour} className="border-t">
+                                                  <td className="px-3 py-2">
+                                                    {new Date(hour + ':00:00Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                  </td>
+                                                  <td className="px-3 py-2 text-right">{Statistics.formatValue(hourlyData.min, selectedMetric?.unit || "")}</td>
+                                                  <td className="px-3 py-2 text-right">{Statistics.formatValue(hourlyData.max, selectedMetric?.unit || "")}</td>
+                                                  <td className="px-3 py-2 text-right">{Statistics.formatValue(hourlyData.avg, selectedMetric?.unit || "")}</td>
+                                                  <td className="px-3 py-2 text-right">{Statistics.formatValue(hourlyData.p95, selectedMetric?.unit || "")}</td>
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )
+                              })()}
+                            </CardContent>
+                          </Card>
                         </div>
                       ) : (
                         <div className="flex items-center justify-center h-[400px] text-muted-foreground">

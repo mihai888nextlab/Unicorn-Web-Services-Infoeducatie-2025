@@ -123,6 +123,56 @@ export const dashboardTemplates: DashboardTemplate[] = [
       },
     ],
   },
+  {
+    id: "services",
+    name: "Services Overview",
+    description: "Complete overview of all UWS cloud services",
+    layout: "grid",
+    cards: [
+      {
+        id: "storage-overview",
+        type: "storage-service",
+        title: "Object Storage",
+        size: "medium",
+        position: 0,
+      },
+      {
+        id: "database-overview",
+        type: "database-service",
+        title: "Database Services",
+        size: "medium",
+        position: 1,
+      },
+      {
+        id: "compute-overview",
+        type: "compute-service",
+        title: "Compute Services",
+        size: "medium",
+        position: 2,
+      },
+      {
+        id: "lambda-overview",
+        type: "lambda-service",
+        title: "Lambda Functions",
+        size: "medium",
+        position: 3,
+      },
+      {
+        id: "queue-overview",
+        type: "queue-service",
+        title: "Message Queue",
+        size: "medium",
+        position: 4,
+      },
+      {
+        id: "secrets-overview",
+        type: "secrets-service",
+        title: "Secrets Manager",
+        size: "medium",
+        position: 5,
+      },
+    ],
+  },
 ]
 
 export const layoutStyles = {
